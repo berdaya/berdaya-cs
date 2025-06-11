@@ -7,9 +7,15 @@ interface OpenAIError extends Error {
   code?: string;
 }
 
+type Props = {
+  params: {
+    threadId: string;
+  };
+};
+
 export async function GET(
   request: Request,
-  context: { params: { threadId: string } }
+  { params }: Props
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -25,7 +31,7 @@ export async function GET(
       );
     }
 
-    const threadId = context.params.threadId;
+    const threadId = params.threadId;
 
     // Get thread from database to get OpenAI thread ID
     const thread = await prisma.thread.findUnique({
