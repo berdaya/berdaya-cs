@@ -38,40 +38,44 @@ export async function POST(request: Request) {
     console.log("Customer info:", { name: customer.name, email: customer.email, phone: customer.phone });
 
     // Get or create customer
-    let customerRecord = await prisma.customer.findFirst({
-      where: {
-        OR: [
-          { email: customer.email || undefined },
-          { phone: customer.phone || undefined }
-        ]
-      },
-    });
-
-    if (!customerRecord) {
-      console.log('Creating new customer record');
-      customerRecord = await prisma.customer.create({
-        data: {
-          name: customer.name,
-          email: customer.email,
-          phone: customer.phone,
+    const getOrCreateCustomer = async () => {
+      let customerRecord = await prisma.customer.findFirst({
+        where: {
+          OR: [
+            { email: customer.email || undefined },
+            { phone: customer.phone || undefined }
+          ]
         },
       });
-    } else {
-      console.log('Updating existing customer record');
-      // Update customer if any information has changed
-      customerRecord = await prisma.customer.update({
-        where: { id: customerRecord.id },
-        data: {
-          name: customer.name || customerRecord.name,
-          phone: customer.phone || customerRecord.phone,
-        },
-      });
-    }
 
-    // Always create a new thread for each chat
-    console.log('Creating new thread');
-    // Create new OpenAI thread
-    const openaiThread = await openai.beta.threads.create();
+      if (!customerRecord) {
+        console.log('Creating new customer record');
+        customerRecord = await prisma.customer.create({
+          data: {
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone,
+          },
+        });
+      } else {
+        console.log('Updating existing customer record');
+        // Update customer if any information has changed
+        customerRecord = await prisma.customer.update({
+          where: { id: customerRecord.id },
+          data: {
+            name: customer.name || customerRecord.name,
+            phone: customer.phone || customerRecord.phone,
+          },
+        });
+      }
+      return customerRecord;
+    };
+
+    // Parallelize customer and thread creation
+    const [customerRecord, openaiThread] = await Promise.all([
+      getOrCreateCustomer(),
+      openai.beta.threads.create(),
+    ]);
     console.log('Created OpenAI thread:', openaiThread.id);
 
     const thread = await prisma.thread.create({
@@ -123,14 +127,16 @@ export async function POST(request: Request) {
     // Start the run monitoring in the background
     (async () => {
       try {
-        // Wait for the run to complete with exponential backoff
+        // Send initial typing indicator
+        await sendSSE({ type: 'chunk', content: '...' });
+
+        // Wait for the run to complete with optimized polling
         let runStatus;
         let retryCount = 0;
-        const maxRetries = 10;
-        const baseDelay = 200; // Start with 200ms delay
+        const maxRetries = 20;
+        const delay = 300; // Fixed 300ms delay
 
         do {
-          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), 1000); // Cap at 1 second
           await new Promise(resolve => setTimeout(resolve, delay));
           
           runStatus = await openai.beta.threads.runs.retrieve(
