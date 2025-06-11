@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
+import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
+
+interface OpenAIError extends Error {
+  status?: number;
+  code?: string;
+}
 
 type ThreadWithCount = {
   id: string;
@@ -62,12 +68,13 @@ export async function GET(request: Request) {
       success: true,
       threads: formattedThreads,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error listing threads:', error);
+    const openAIError = error as OpenAIError;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to list threads',
+        error: openAIError.message || 'Failed to list threads',
       },
       { status: 500 }
     );

@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+interface OpenAIError extends Error {
+  status?: number;
+  code?: string;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -78,12 +83,13 @@ export async function POST(request: Request) {
         createdAt: new Date().toISOString(),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating assistant:', error);
+    const openAIError = error as OpenAIError;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to create assistant',
+        error: openAIError.message || 'Failed to create assistant',
       },
       { status: 500 }
     );
@@ -114,12 +120,13 @@ export async function GET() {
         createdAt: new Date().toISOString(),
       })),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching assistants:', error);
+    const openAIError = error as OpenAIError;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to fetch assistants',
+        error: openAIError.message || 'Failed to fetch assistants',
       },
       { status: 500 }
     );
@@ -164,12 +171,13 @@ export async function DELETE(request: Request) {
       success: true,
       message: 'Assistant deleted successfully',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting assistant:', error);
+    const openAIError = error as OpenAIError;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to delete assistant',
+        error: openAIError.message || 'Failed to delete assistant',
       },
       { status: 500 }
     );

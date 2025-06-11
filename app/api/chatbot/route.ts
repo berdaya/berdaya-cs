@@ -1,6 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
+
+interface OpenAIError extends Error {
+  status?: number;
+  code?: string;
+}
 
 const errorResponse = (message: string, details: unknown = null, status = 400) => {
   return NextResponse.json(
@@ -99,7 +104,19 @@ export async function POST(request: Request) {
     const encoder = new TextEncoder();
 
     // Function to send SSE data
-    const sendSSE = async (data: any) => {
+    interface SSEData {
+      type: 'done' | 'error';
+      session_id?: string;
+      message?: {
+        id: string;
+        role: string;
+        content: string;
+        createdAt: string;
+      };
+      error?: string;
+    }
+
+    const sendSSE = async (data: SSEData) => {
       await writer.write(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
     };
 
@@ -165,9 +182,10 @@ export async function POST(request: Request) {
         'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in chatbot endpoint:', error);
-    return errorResponse(error.message || 'Failed to process message', error, 500);
+    const openAIError = error as OpenAIError;
+    return errorResponse(openAIError.message || 'Failed to process message', error, 500);
   }
 }
 

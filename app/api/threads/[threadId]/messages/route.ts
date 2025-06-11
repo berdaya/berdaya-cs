@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
 
+interface OpenAIError extends Error {
+  status?: number;
+  code?: string;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { threadId: string } }
@@ -53,12 +58,13 @@ export async function GET(
       success: true,
       messages: formattedMessages,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching messages:', error);
+    const openAIError = error as OpenAIError;
     return NextResponse.json(
       {
         success: false,
-        error: error.message || 'Failed to fetch messages',
+        error: openAIError.message || 'Failed to fetch messages',
       },
       { status: 500 }
     );
