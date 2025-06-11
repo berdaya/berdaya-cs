@@ -22,7 +22,7 @@ type ChatbotFormProps = {
 export default function ChatbotForm({ onSubmit, onCancel, isUploading }: ChatbotFormProps) {
   const [name, setName] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [model, setModel] = useState('gpt-4-turbo-preview');
+  const [model] = useState('gpt-4o-mini');
   const [tools, setTools] = useState<string[]>(['retrieval']);
   const [temperature, setTemperature] = useState(0.7);
   const [topP, setTopP] = useState(1);
@@ -167,25 +167,14 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           
           <div className="mb-4">
             <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Model *
+              Model
             </label>
-            <select
-              id="model"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              required
-            >
-              <optgroup label="GPT-4 Models">
-                <option value="gpt-4-turbo-preview">GPT-4 Turbo (Latest)</option>
-                <option value="gpt-4-1106-preview">GPT-4 Turbo (November 2023)</option>
-                <option value="gpt-4-vision-preview">GPT-4 Vision</option>
-              </optgroup>
-              <optgroup label="GPT-3.5 Models">
-                <option value="gpt-3.5-turbo-0125">GPT-3.5 Turbo (Latest)</option>
-                <option value="gpt-3.5-turbo-1106">GPT-3.5 Turbo (November 2023)</option>
-              </optgroup>
-            </select>
+            <input
+              type="text"
+              value="GPT-4o-mini"
+              disabled
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+            />
           </div>
           
           <div className="mb-4">
