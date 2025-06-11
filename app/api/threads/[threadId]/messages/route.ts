@@ -7,15 +7,9 @@ interface OpenAIError extends Error {
   code?: string;
 }
 
-type Props = {
-  params: {
-    threadId: string;
-  };
-};
-
 export async function GET(
   request: Request,
-  { params }: Props
+  { params }: { params: { threadId: string } }
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -75,4 +69,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}
