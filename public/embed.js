@@ -105,7 +105,7 @@
       .chat-window {
         width: 360px;
         max-width: calc(100vw - 40px);
-        height: 500px;
+        height: 550px;
         max-height: calc(100vh - 100px);
         background: var(--chat-bg);
         color: var(--chat-text);
@@ -141,6 +141,8 @@
         padding: 20px;
         display: flex;
         flex-direction: column;
+        overflow-y: auto;
+        flex: 1;
       }
       
       .chat-form label {
@@ -449,9 +451,19 @@
       <label for="customer-phone">Phone *</label>
       <input type="tel" id="customer-phone" placeholder="Your phone">
       
-      <div style="font-size: 12px; color: #6b7280; margin-bottom: 15px;">* Please provide either email or phone number</div>
+      <div style="font-size: 12px; color: var(--chat-text); margin-bottom: 15px;">* Please provide either email or phone number</div>
       
       <button type="submit" id="submit-info">Start Chatting</button>
+
+      <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--chat-input-border);">
+        <div style="font-size: 12px; color: var(--chat-text); text-align: center;">
+          Need immediate assistance? Contact us directly:
+          <div style="margin-top: 5px;">
+            <a href="https://wa.me/628113084084" style="color: var(--chat-link-color); text-decoration: none;">+62 811-3084-084</a> | 
+            <a href="mailto:admin.odoo@lui.co.id" style="color: var(--chat-link-color); text-decoration: none;">admin.odoo@lui.co.id</a>
+          </div>
+        </div>
+      </div>
     `;
     
     // Chat messages area
