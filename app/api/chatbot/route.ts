@@ -124,16 +124,24 @@ export async function POST(request: Request) {
     // Start the run monitoring in the background
     (async () => {
       try {
-        // Wait for the run to complete
+        // Wait for the run to complete with exponential backoff
         let runStatus;
+        let retryCount = 0;
+        const maxRetries = 10;
+        const baseDelay = 200; // Start with 200ms delay
+
         do {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          const delay = Math.min(baseDelay * Math.pow(1.5, retryCount), 1000); // Cap at 1 second
+          await new Promise(resolve => setTimeout(resolve, delay));
+          
           runStatus = await openai.beta.threads.runs.retrieve(
             run.id,
             { thread_id: thread.openaiId }
           );
           console.log('Run status:', runStatus.status);
-        } while (runStatus.status === 'in_progress' || runStatus.status === 'queued');
+          
+          retryCount++;
+        } while ((runStatus.status === 'in_progress' || runStatus.status === 'queued') && retryCount < maxRetries);
 
         if (runStatus.status === 'completed') {
           console.log('Run completed, fetching messages');
@@ -146,15 +154,15 @@ export async function POST(request: Request) {
             ? assistantMessage.content[0].text.value 
             : '';
 
-          // Stream the content word by word
-          const words = content.split(/\s+/);
-          for (const word of words) {
+          // Stream the content in larger chunks for better performance
+          const chunks = content.match(/.{1,20}/g) || []; // Split into chunks of ~20 characters
+          for (const chunk of chunks) {
             await sendSSE({
               type: 'chunk',
-              content: word + ' '
+              content: chunk
             });
-            // Add a small delay between words for natural streaming
-            await new Promise(resolve => setTimeout(resolve, 50));
+            // Reduced delay between chunks
+            await new Promise(resolve => setTimeout(resolve, 20));
           }
 
           // Send the complete message
