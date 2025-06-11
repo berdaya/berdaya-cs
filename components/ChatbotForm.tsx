@@ -59,34 +59,34 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="flex items-center mb-6">
         <button
           onClick={onCancel}
-          className="mr-4 text-gray-600 hover:text-gray-900 transition-colors"
+          className="mr-4 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Create New Chatbot
         </h2>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-gray-100 p-4 rounded-lg mb-6 text-sm border border-gray-200">
+        <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-6 text-sm border border-gray-200 dark:border-gray-600">
           <div className="flex items-start">
-            <Info className="h-5 w-5 text-gray-900 mr-2 mt-0.5" />
-            <p className="text-gray-900">
+            <Info className="h-5 w-5 text-gray-900 dark:text-gray-200 mr-2 mt-0.5" />
+            <p className="text-gray-900 dark:text-gray-200">
               Fill out this form to configure your chatbot. You&apos;ll need an OpenAI API key and a prompt that defines how your chatbot should behave.
             </p>
           </div>
         </div>
         
-        <div className="p-4 border border-gray-200 rounded-lg">
-          <h3 className="font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">API Configuration</h3>
+        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <h3 className="font-medium text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">API Configuration</h3>
           
           <div className="mb-4">
-            <label htmlFor="openaiApiKey" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="openaiApiKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               OpenAI API Key *
             </label>
             <input
@@ -94,17 +94,17 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
               id="openaiApiKey"
               value={openaiApiKey}
               onChange={(e) => setOpenaiApiKey(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 transition-colors"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="sk-..."
               required
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Your API key will be stored securely and used only for this chatbot. Get your API key from{' '}
               <a 
                 href="https://platform.openai.com/api-keys" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-gray-900 hover:text-gray-700"
+                className="text-gray-900 dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-400"
               >
                 OpenAI Platform
               </a>
@@ -112,11 +112,11 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           </div>
         </div>
         
-        <div className="p-4 border border-gray-200 rounded-lg">
-          <h3 className="font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">Basic Information</h3>
+        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <h3 className="font-medium text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Basic Information</h3>
           
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Chatbot Name *
             </label>
             <input
@@ -124,28 +124,28 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 transition-colors"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="My Awesome Chatbot"
               required
             />
           </div>
           
           <div>
-            <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="instructions" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Instructions *
             </label>
             <div className="mb-2 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setInstructions(`You are a helpful customer service chatbot. Your goal is to assist customers with their questions about our products and services. Always be polite, professional, and empathetic. If you don't know the answer to a question, acknowledge that and offer to connect the customer with a human agent.`)}
-                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-900 px-2 py-1 rounded transition-colors"
+                className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 px-2 py-1 rounded transition-colors"
               >
                 Basic Customer Service
               </button>
               <button
                 type="button"
                 onClick={() => setInstructions(`You are a friendly and knowledgeable customer service chatbot. Your primary goal is to help customers with product inquiries, order status, and general support. Always maintain a positive tone and provide clear, concise information. If a customer seems frustrated, acknowledge their feelings and offer appropriate solutions.`)}
-                className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-900 px-2 py-1 rounded transition-colors"
+                className="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-200 px-2 py-1 rounded transition-colors"
               >
                 Product Support
               </button>
@@ -154,7 +154,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
               id="instructions"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 transition-colors"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               rows={6}
               required
               placeholder="You are a helpful customer service chatbot for [company name]. Your goal is to assist customers with their questions about our products and services..."
@@ -162,18 +162,18 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           </div>
         </div>
         
-        <div className="p-4 border border-gray-200 rounded-lg">
-          <h3 className="font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">Chatbot Configuration</h3>
+        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <h3 className="font-medium text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">Chatbot Configuration</h3>
           
           <div className="mb-4">
-            <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Model *
             </label>
             <select
               id="model"
               value={model}
               onChange={(e) => setModel(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 transition-colors"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               required
             >
               <optgroup label="GPT-4 Models">
@@ -189,14 +189,14 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           </div>
           
           <div className="mb-4">
-            <label htmlFor="tools" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="tools" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Tools
             </label>
             <select
               id="tools"
               value={tools}
               onChange={(e) => setTools(e.target.value.split(','))}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 transition-colors"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               multiple
             >
               <option value="retrieval">Retrieval</option>
@@ -204,7 +204,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           </div>
           
           <div className="mb-4">
-            <label htmlFor="temperature" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="temperature" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Temperature: {temperature}
             </label>
             <input
@@ -212,19 +212,19 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
               id="temperature"
               value={temperature}
               onChange={(e) => setTemperature(Number(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
               min={0}
               max={2}
               step={0.1}
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>0 (More Focused)</span>
               <span>2 (More Creative)</span>
             </div>
           </div>
           
           <div className="mb-4">
-            <label htmlFor="topP" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="topP" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Top P: {topP}
             </label>
             <input
@@ -232,12 +232,12 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
               id="topP"
               value={topP}
               onChange={(e) => setTopP(Number(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
               min={0}
               max={1}
               step={0.1}
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
               <span>0 (More Focused)</span>
               <span>1 (More Diverse)</span>
             </div>
@@ -245,14 +245,14 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
         </div>
         
         <div className="mb-4">
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Knowledge Files (Optional)
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-md px-6 pt-5 pb-6">
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md px-6 pt-5 pb-6">
             <div className="space-y-1 text-center">
-              <Upload className="mx-auto h-12 w-12 text-gray-400" />
-              <div className="flex text-sm text-gray-600">
-                <label htmlFor="file" className="relative cursor-pointer bg-white rounded-md font-medium text-gray-900 hover:text-gray-800 focus-within:outline-none">
+              <Upload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+              <div className="flex text-sm text-gray-600 dark:text-gray-400">
+                <label htmlFor="file" className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-gray-900 dark:text-gray-200 hover:text-gray-800 dark:hover:text-gray-300 focus-within:outline-none">
                   <span>Upload a file</span>
                   <input
                     id="file"
@@ -266,11 +266,11 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Supported formats: TXT, PDF, DOC, DOCX (up to 10MB)
               </p>
               {file && (
-                <p className="text-sm text-gray-900">
+                <p className="text-sm text-gray-900 dark:text-gray-200">
                   Selected: {file.name}
                 </p>
               )}
@@ -282,7 +282,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           <button
             type="submit"
             disabled={isUploading}
-            className="flex-1 bg-gray-900 text-white py-3 px-4 rounded-md hover:bg-gray-800 disabled:bg-gray-400 transition-colors flex items-center justify-center"
+            className="flex-1 bg-gray-900 dark:bg-gray-700 text-white py-3 px-4 rounded-md hover:bg-gray-800 dark:hover:bg-gray-600 disabled:bg-gray-400 dark:disabled:bg-gray-500 transition-colors flex items-center justify-center"
           >
             {isUploading ? (
               <>
@@ -295,7 +295,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 bg-gray-200 text-gray-900 py-3 px-4 rounded-md hover:bg-gray-300 transition-colors"
+            className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-200 py-3 px-4 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             Cancel
           </button>

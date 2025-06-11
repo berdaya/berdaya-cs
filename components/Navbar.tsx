@@ -40,7 +40,11 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-900 text-white p-4 border-b border-gray-700">
       <div className="container mx-auto flex justify-between items-center">
-        <div className="font-bold text-lg">Chatbot Admin</div>
+        <div className="font-bold text-lg">
+          <Link href="/" className="hover:text-gray-300 transition-colors">
+            Chatbot Admin
+          </Link>
+        </div>
         <div className="space-x-6">
           {isAuthenticated ? (
             <>
