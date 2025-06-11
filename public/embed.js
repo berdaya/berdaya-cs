@@ -291,8 +291,14 @@
       
       .chat-input-area {
         display: flex;
+        flex-direction: column;
         border-top: 1px solid #e5e7eb;
         padding: 10px;
+      }
+      
+      .chat-input-container {
+        display: flex;
+        margin-bottom: 8px;
       }
       
       .chat-input {
@@ -305,6 +311,22 @@
         outline: none;
         max-height: 100px;
         overflow-y: auto;
+      }
+      
+      .chat-contact-info {
+        font-size: 12px;
+        color: #6b7280;
+        text-align: center;
+        padding: 0 10px;
+      }
+      
+      .chat-contact-info a {
+        color: #4f46e5;
+        text-decoration: none;
+      }
+      
+      .chat-contact-info a:hover {
+        text-decoration: underline;
       }
       
       .chat-send {
@@ -401,12 +423,18 @@
     const chatInputArea = document.createElement('div');
     chatInputArea.className = 'chat-input-area hidden';
     chatInputArea.innerHTML = `
-      <textarea class="chat-input" placeholder="Type your message..."></textarea>
-      <button class="chat-send">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
-      </button>
+      <div class="chat-input-container">
+        <textarea class="chat-input" placeholder="Type your message..."></textarea>
+        <button class="chat-send">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
+      </div>
+      <div class="chat-contact-info">
+        <a href="https://wa.me/628113084084">+62 811-3084-084</a> | 
+        <a href="mailto:admin.odoo@lui.co.id">admin.odoo@lui.co.id</a>
+      </div>
     `;
     
     // Assemble all elements
