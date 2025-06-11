@@ -778,72 +778,66 @@
             messages: [messageText]
           })
         });
-
+    
         if (!response.ok) {
           throw new Error(`Failed to get response: ${response.status} ${response.statusText}`);
         }
-
+    
         // Hide typing indicator and start streaming
         hideTypingIndicator();
         
         // Create streaming message element
         const streamingElements = createStreamingBotMessage();
-        let accumulatedText = '';
-        let lastUpdateTime = Date.now();
-        const UPDATE_INTERVAL = 50; // Update UI every 50ms for smooth streaming
-
+        let finalContent = '';
+    
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
-
+    
         try {
           while (true) {
             const { value, done } = await reader.read();
             if (done) break;
-
+    
             const chunk = decoder.decode(value, { stream: true });
             buffer += chunk;
             
             // Process complete lines
             const lines = buffer.split('\n');
             buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
+    
             for (const line of lines) {
               if (line.startsWith('data: ')) {
                 try {
                   const data = JSON.parse(line.slice(6));
                   console.log('Parsed SSE data:', data);
                   
-                  if (data.type === 'done') {
-                    // Final message content
-                    accumulatedText = data.message.content;
-                    updateStreamingMessage(streamingElements, accumulatedText, true);
-
+                  if (data.type === 'chunk' && data.content) {
+                    // Update streaming content with each chunk
+                    updateStreamingMessage(streamingElements, data.content, false);
+                    finalContent = data.content; // Keep track of latest content
+                    
+                  } else if (data.type === 'done') {
+                    // Final message - use the complete content
+                    finalContent = data.message.content;
+                    updateStreamingMessage(streamingElements, finalContent, true);
+    
                     // Save session ID if it's a new conversation
                     if (!sessionId && data.session_id) {
                       sessionId = data.session_id;
                       console.log('Received new session ID:', sessionId);
                       localStorage.setItem(`chatbot_session_${chatbotId}`, sessionId);
                     }
-
+    
                     // Save bot message to history
-                    messageHistory.push({ role: 'assistant', content: data.message.content });
+                    messageHistory.push({ role: 'assistant', content: finalContent });
                     
                     // Store updated message history
                     localStorage.setItem(`chatbot_messages_${chatbotId}_${sessionId}`, JSON.stringify(messageHistory));
+                    break; // Exit the processing loop
                     
                   } else if (data.type === 'error') {
                     throw new Error(data.error);
-                  } else if (data.type === 'chunk' && data.content) {
-                    // Handle streaming chunks (if your backend sends them)
-                    accumulatedText += data.content;
-                    
-                    // Throttle UI updates for performance
-                    const now = Date.now();
-                    if (now - lastUpdateTime > UPDATE_INTERVAL) {
-                      updateStreamingMessage(streamingElements, accumulatedText, false);
-                      lastUpdateTime = now;
-                    }
                   }
                 } catch (e) {
                   console.error('Error parsing SSE data:', e, 'Line:', line);

@@ -127,9 +127,6 @@ export async function POST(request: Request) {
     // Start the run monitoring in the background
     (async () => {
       try {
-        // Send initial typing indicator
-        await sendSSE({ type: 'chunk', content: '...' });
-
         // Wait for the run to complete with optimized polling
         let runStatus;
         let retryCount = 0;
@@ -159,18 +156,23 @@ export async function POST(request: Request) {
             ? assistantMessage.content[0].text.value 
             : '';
 
-          // Stream the content in larger chunks for better performance
-          const chunks = content.match(/.{1,20}/g) || []; // Split into chunks of ~20 characters
-          for (const chunk of chunks) {
+          // Stream the content in chunks for better UX
+          const words = content.split(' ');
+          let accumulatedContent = '';
+          
+          for (let i = 0; i < words.length; i++) {
+            accumulatedContent += (i > 0 ? ' ' : '') + words[i];
+            
             await sendSSE({
               type: 'chunk',
-              content: chunk
+              content: accumulatedContent
             });
-            // Reduced delay between chunks
-            await new Promise(resolve => setTimeout(resolve, 20));
+            
+            // Small delay for streaming effect
+            await new Promise(resolve => setTimeout(resolve, 30));
           }
 
-          // Send the complete message
+          // Send the final complete message
           await sendSSE({
             type: 'done',
             session_id: thread.id,
