@@ -18,7 +18,7 @@ type ThreadWithCount = {
   };
 };
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     // Get threads from database
     const threads = await prisma.thread.findMany({
