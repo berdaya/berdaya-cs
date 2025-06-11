@@ -34,8 +34,8 @@ export async function POST(request: Request) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    console.log('Processing message for chatbot:', chatbot_id);
-    console.log('Customer info:', { name: customer.name, email: customer.email, phone: customer.phone });
+    console.log("Processing message for chatbot:", chatbot_id);
+    console.log("Customer info:", { name: customer.name, email: customer.email, phone: customer.phone });
 
     // Get or create customer
     let customerRecord = await prisma.customer.findFirst({
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
 
     // Function to send SSE data
     interface SSEData {
-      type: 'done' | 'error';
+      type: 'done' | 'error' | 'chunk';
       session_id?: string;
       message?: {
         id: string;
@@ -114,6 +114,7 @@ export async function POST(request: Request) {
         createdAt: string;
       };
       error?: string;
+      content?: string;
     }
 
     const sendSSE = async (data: SSEData) => {
@@ -141,6 +142,21 @@ export async function POST(request: Request) {
           const assistantMessage = assistantMessages.data[0];
           console.log('Got assistant message:', assistantMessage.id);
 
+          const content = assistantMessage.content[0].type === 'text' 
+            ? assistantMessage.content[0].text.value 
+            : '';
+
+          // Stream the content word by word
+          const words = content.split(/\s+/);
+          for (const word of words) {
+            await sendSSE({
+              type: 'chunk',
+              content: word + ' '
+            });
+            // Add a small delay between words for natural streaming
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+
           // Send the complete message
           await sendSSE({
             type: 'done',
@@ -148,9 +164,7 @@ export async function POST(request: Request) {
             message: {
               id: assistantMessage.id,
               role: assistantMessage.role,
-              content: assistantMessage.content[0].type === 'text' 
-                ? assistantMessage.content[0].text.value 
-                : '',
+              content: content,
               createdAt: new Date(assistantMessage.created_at * 1000).toISOString(),
             }
           });

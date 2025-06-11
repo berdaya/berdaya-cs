@@ -12,14 +12,12 @@ export default function Navbar() {
   useEffect(() => {
     // Check if authenticated on client-side
     const auth = localStorage.getItem('isAuthenticated');
-    const apiKey = localStorage.getItem('openai_api_key');
-    setIsAuthenticated(auth === 'true' && !!apiKey);
+    setIsAuthenticated(auth === 'true');
     
     // Add event listener for auth changes
     const handleStorageChange = () => {
       const authState = localStorage.getItem('isAuthenticated');
-      const apiKey = localStorage.getItem('openai_api_key');
-      setIsAuthenticated(authState === 'true' && !!apiKey);
+      setIsAuthenticated(authState === 'true');
     };
     
     window.addEventListener('storage', handleStorageChange);
@@ -35,7 +33,6 @@ export default function Navbar() {
   
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('openai_api_key');
     setIsAuthenticated(false);
     router.push('/');
   };
