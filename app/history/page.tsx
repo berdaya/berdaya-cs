@@ -30,7 +30,22 @@ export default function HistoryPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const router = useRouter();
+
+  useEffect(() => {
+    // Check system theme preference
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setTheme(mediaQuery.matches ? 'dark' : 'light');
+
+    // Listen for theme changes
+    const handleThemeChange = (e: MediaQueryListEvent) => {
+      setTheme(e.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleThemeChange);
+  }, []);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -99,9 +114,9 @@ export default function HistoryPage() {
 
   if (loading && !threads.length) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className={`min-h-screen p-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Chat History</h1>
+          <h1 className={`text-3xl font-bold mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Chat History</h1>
           <div className="animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
             <div className="space-y-3">
@@ -116,22 +131,30 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className={`min-h-screen p-8 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Chat History</h1>
+        <h1 className={`text-3xl font-bold mb-8 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Chat History</h1>
         
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-900 p-4 mb-8 rounded-r-lg" role="alert">
+          <div className={`border-l-4 p-4 mb-8 rounded-r-lg ${
+            theme === 'dark' 
+              ? 'bg-red-900/50 border-red-500 text-red-200' 
+              : 'bg-red-50 border-red-500 text-red-900'
+          }`} role="alert">
             <p className="font-medium">{error}</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Threads List */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Conversations</h2>
+          <div className={`rounded-lg shadow p-6 ${
+            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <h2 className={`text-xl font-semibold mb-4 ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>Conversations</h2>
             {threads.length === 0 ? (
-              <p className="text-gray-500">No conversations found</p>
+              <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>No conversations found</p>
             ) : (
               <div className="space-y-2">
                 {threads.map((thread) => (
@@ -140,8 +163,12 @@ export default function HistoryPage() {
                     onClick={() => fetchThreadMessages(thread.id)}
                     className={`w-full text-left p-3 rounded-lg transition-colors cursor-pointer ${
                       selectedThread === thread.id
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'hover:bg-gray-50'
+                        ? theme === 'dark'
+                          ? 'bg-blue-900/50 text-blue-300'
+                          : 'bg-blue-50 text-blue-700'
+                        : theme === 'dark'
+                          ? 'hover:bg-gray-700 text-gray-200'
+                          : 'hover:bg-gray-50 text-gray-900'
                     }`}
                   >
                     <div className="flex justify-between items-center">
@@ -149,7 +176,9 @@ export default function HistoryPage() {
                         {thread.customer.name}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className={`text-sm ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}>
                       {thread.customer.email && (
                         <div>Email: {thread.customer.email}</div>
                       )}
@@ -165,9 +194,13 @@ export default function HistoryPage() {
           </div>
 
           {/* Messages */}
-          <div className="md:col-span-2 bg-white rounded-lg shadow p-6">
+          <div className={`md:col-span-2 rounded-lg shadow p-6 ${
+            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+          }`}>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Messages</h2>
+              <h2 className={`text-xl font-semibold ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>Messages</h2>
               {selectedThread && messages.length > 0 && (
                 <button
                   onClick={() => {
@@ -186,7 +219,11 @@ export default function HistoryPage() {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+                  className={`px-4 py-2 rounded-lg transition-colors cursor-pointer ${
+                    theme === 'dark'
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
                 >
                   Export to JSON
                 </button>
@@ -194,7 +231,7 @@ export default function HistoryPage() {
             </div>
             {selectedThread ? (
               messages.length === 0 ? (
-                <p className="text-gray-500">No messages in this conversation</p>
+                <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>No messages in this conversation</p>
               ) : (
                 <div className="space-y-4">
                   {[...messages].reverse().map((message) => (
@@ -202,19 +239,29 @@ export default function HistoryPage() {
                       key={message.id}
                       className={`p-4 rounded-lg ${
                         message.role === 'assistant'
-                          ? 'bg-blue-50'
-                          : 'bg-gray-50'
+                          ? theme === 'dark'
+                            ? 'bg-blue-900/50'
+                            : 'bg-blue-50'
+                          : theme === 'dark'
+                            ? 'bg-gray-700'
+                            : 'bg-gray-50'
                       }`}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium">
+                        <span className={`font-medium ${
+                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}>
                           {message.role === 'assistant' ? 'Assistant' : 'User'}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className={`text-sm ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        }`}>
                           {new Date(message.createdAt).toLocaleString()}
                         </span>
                       </div>
-                      <div className="text-gray-700 whitespace-pre-wrap">
+                      <div className={`whitespace-pre-wrap ${
+                        theme === 'dark' ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
                         <ReactMarkdown>{message.content}</ReactMarkdown>
                       </div>
                     </div>
@@ -222,7 +269,7 @@ export default function HistoryPage() {
                 </div>
               )
             ) : (
-              <p className="text-gray-500">Select a conversation to view messages</p>
+              <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>Select a conversation to view messages</p>
             )}
           </div>
         </div>
