@@ -35,9 +35,8 @@ export default function HistoryPage() {
   useEffect(() => {
     const checkAuth = () => {
       const isAuthenticated = localStorage.getItem('isAuthenticated');
-      const apiKey = localStorage.getItem('openai_api_key');
       
-      if (isAuthenticated !== 'true' || !apiKey) {
+      if (isAuthenticated !== 'true') {
         router.push('/');
         return false;
       }
@@ -45,19 +44,16 @@ export default function HistoryPage() {
     };
 
     if (checkAuth()) {
-      const apiKey = localStorage.getItem('openai_api_key');
-      if (apiKey) {
-        fetchThreads(apiKey);
-      }
+      fetchThreads();
     }
   }, [router]);
 
-  const fetchThreads = async (apiKey: string) => {
+  const fetchThreads = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/threads?api_key=${encodeURIComponent(apiKey)}`);
+      const response = await fetch('/api/threads');
       if (!response.ok) {
         throw new Error('Failed to fetch threads');
       }
@@ -80,13 +76,8 @@ export default function HistoryPage() {
     try {
       setLoading(true);
       setError(null);
-      const apiKey = localStorage.getItem('openai_api_key');
 
-      if (!apiKey) {
-        throw new Error('API key not found');
-      }
-
-      const response = await fetch(`/api/threads/${threadId}/messages?api_key=${encodeURIComponent(apiKey)}`);
+      const response = await fetch(`/api/threads/${threadId}/messages`);
       if (!response.ok) {
         throw new Error('Failed to fetch messages');
       }
