@@ -12,11 +12,12 @@ type ChatbotListProps = {
   chatbots: Chatbot[];
   onDelete: (id: string) => void;
   onCreateNew: () => void;
+  className?: string;
 };
 
-export default function ChatbotList({ chatbots, onDelete, onCreateNew }: ChatbotListProps) {
+export default function ChatbotList({ chatbots, onDelete, onCreateNew, className }: ChatbotListProps) {
   return (
-    <div>
+    <div className={className}>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-900">Your Chatbots</h2>
         <button 
