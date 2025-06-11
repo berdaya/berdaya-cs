@@ -59,7 +59,7 @@ export default function Home() {
           
           <button
             type={"submit" as const}
-            className="w-full bg-gray-900 text-white py-3 px-4 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 transition-all font-medium"
+            className="w-full bg-gray-900 text-white py-3 px-4 rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 transition-all font-medium cursor-pointer"
           >
             Submit
           </button>

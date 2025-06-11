@@ -138,7 +138,7 @@ export default function HistoryPage() {
                   <button
                     key={thread.id}
                     onClick={() => fetchThreadMessages(thread.id)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    className={`w-full text-left p-3 rounded-lg transition-colors cursor-pointer ${
                       selectedThread === thread.id
                         ? 'bg-blue-50 text-blue-700'
                         : 'hover:bg-gray-50'
@@ -186,7 +186,7 @@ export default function HistoryPage() {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
                 >
                   Export to JSON
                 </button>

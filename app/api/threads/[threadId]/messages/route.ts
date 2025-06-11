@@ -12,19 +12,6 @@ export async function GET(
   { params }: { params: Promise<{ threadId: string }> }
 ) {
   try {
-    const { searchParams } = new URL(request.url);
-    const apiKey = searchParams.get('api_key');
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'API key is required',
-        },
-        { status: 400 }
-      );
-    }
-
     const { threadId } = await params;
 
     // Get thread from database to get OpenAI thread ID
@@ -42,8 +29,12 @@ export async function GET(
       );
     }
 
+    // Initialize OpenAI with server-side API key
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
     // Get messages from OpenAI
-    const openai = new OpenAI();
     const messages = await openai.beta.threads.messages.list(thread.openaiId);
 
     // Format messages for the frontend

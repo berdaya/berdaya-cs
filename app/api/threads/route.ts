@@ -20,19 +20,6 @@ type ThreadWithCount = {
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const apiKey = searchParams.get('api_key');
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'API key is required',
-        },
-        { status: 400 }
-      );
-    }
-
     // Get threads from database
     const threads = await prisma.thread.findMany({
       include: {

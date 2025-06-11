@@ -187,6 +187,7 @@ export default function Playground() {
             chatbots={chatbots}
             onDelete={handleDeleteChatbot}
             onCreateNew={() => setIsCreating(true)}
+            className="cursor-pointer"
           />
         ) : (
           <ChatbotForm

@@ -137,13 +137,12 @@ export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const apiKey = searchParams.get('api_key');
 
-    if (!id || !apiKey) {
+    if (!id) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Assistant ID and API key are required',
+          error: 'Assistant ID is required',
         },
         { status: 400 }
       );
@@ -151,7 +150,7 @@ export async function DELETE(request: Request) {
 
     // Initialize OpenAI client
     const openai = new OpenAI({
-      apiKey,
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
     // Get assistant details to check for vector store
