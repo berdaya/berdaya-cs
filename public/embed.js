@@ -15,9 +15,18 @@
       return;
     }
     
-    // Get host URL
-    const scriptSrc = scriptTag.src;
-    const hostUrl = new URL(scriptSrc).origin;
+    // Get host URL - use the domain where the chatbot is hosted
+    const hostUrl = scriptTag.getAttribute('data-host-url') || (() => {
+      const scriptSrc = scriptTag.src;
+      try {
+        return new URL(scriptSrc).origin;
+      } catch (e) {
+        console.error('Failed to get host URL from script src:', e);
+        return window.location.origin; // Fallback to current origin
+      }
+    })();
+    
+    console.log('Using host URL:', hostUrl);
     
     // Create CSS
     const createStyles = () => {
@@ -159,6 +168,72 @@
           border-bottom-left-radius: 5px;
         }
         
+        /* Markdown styles */
+        .message-bot p {
+          margin: 0 0 10px 0;
+        }
+        
+        .message-bot p:last-child {
+          margin-bottom: 0;
+        }
+        
+        .message-bot code {
+          background-color: #e5e7eb;
+          padding: 2px 4px;
+          border-radius: 4px;
+          font-family: monospace;
+        }
+        
+        .message-bot pre {
+          background-color: #e5e7eb;
+          padding: 10px;
+          border-radius: 4px;
+          overflow-x: auto;
+          margin: 10px 0;
+        }
+        
+        .message-bot pre code {
+          background-color: transparent;
+          padding: 0;
+        }
+        
+        .message-bot ul, .message-bot ol {
+          margin: 10px 0;
+          padding-left: 20px;
+        }
+        
+        .message-bot blockquote {
+          border-left: 4px solid #e5e7eb;
+          margin: 10px 0;
+          padding-left: 10px;
+          color: #6b7280;
+        }
+        
+        .message-bot a {
+          color: #4f46e5;
+          text-decoration: none;
+        }
+        
+        .message-bot a:hover {
+          text-decoration: underline;
+        }
+        
+        .message-bot table {
+          border-collapse: collapse;
+          margin: 10px 0;
+          width: 100%;
+        }
+        
+        .message-bot th, .message-bot td {
+          border: 1px solid #e5e7eb;
+          padding: 8px;
+          text-align: left;
+        }
+        
+        .message-bot th {
+          background-color: #f3f4f6;
+        }
+        
         .typing-indicator {
           align-self: flex-start;
           background-color: #f3f4f6;
@@ -283,11 +358,13 @@
         <label for="customer-name">Name *</label>
         <input type="text" id="customer-name" required placeholder="Your name">
         
-        <label for="customer-email">Email</label>
-        <input type="email" id="customer-email" placeholder="Your email (optional)">
+        <label for="customer-email">Email *</label>
+        <input type="email" id="customer-email" placeholder="Your email">
         
-        <label for="customer-phone">Phone</label>
-        <input type="tel" id="customer-phone" placeholder="Your phone (optional)">
+        <label for="customer-phone">Phone *</label>
+        <input type="tel" id="customer-phone" placeholder="Your phone">
+        
+        <div style="font-size: 12px; color: #6b7280; margin-bottom: 15px;">* Please provide either email or phone number</div>
         
         <button type="submit" id="submit-info">Start Chatting</button>
       `;
@@ -319,13 +396,32 @@
       
       document.body.appendChild(chatWidget);
       
+      // Add marked library
+      const markedScript = document.createElement('script');
+      markedScript.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+      
+      // Create a promise to track when marked is loaded
+      const markedLoaded = new Promise((resolve) => {
+        markedScript.onload = () => {
+          console.log('Marked library loaded');
+          resolve();
+        };
+        markedScript.onerror = (error) => {
+          console.error('Failed to load marked library:', error);
+          resolve(); // Resolve anyway to prevent blocking
+        };
+      });
+      
+      document.head.appendChild(markedScript);
+      
       return {
         chatWidget,
         chatButton,
         chatWindow,
         customerForm,
         chatMessages,
-        chatInputArea
+        chatInputArea,
+        markedLoaded
       };
     };
     
@@ -339,7 +435,8 @@
         chatWindow,
         customerForm,
         chatMessages,
-        chatInputArea
+        chatInputArea,
+        markedLoaded
       } = elements;
       
       // Local state
@@ -384,8 +481,25 @@
         const email = emailInput.value.trim();
         const phone = phoneInput.value.trim();
         
+        // Reset previous error states
+        nameInput.style.borderColor = '#e5e7eb';
+        emailInput.style.borderColor = '#e5e7eb';
+        phoneInput.style.borderColor = '#e5e7eb';
+        
+        let hasError = false;
+        
         if (!name) {
           nameInput.style.borderColor = '#ef4444';
+          hasError = true;
+        }
+        
+        if (!email && !phone) {
+          emailInput.style.borderColor = '#ef4444';
+          phoneInput.style.borderColor = '#ef4444';
+          hasError = true;
+        }
+        
+        if (hasError) {
           return;
         }
         
@@ -422,10 +536,40 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
       
-      function addBotMessage(text) {
+      function addBotMessage(text, citations = []) {
         const messageElement = document.createElement('div');
         messageElement.className = 'chat-message message-bot';
-        messageElement.textContent = text;
+        
+        // Add the main message text with markdown support
+        const textElement = document.createElement('div');
+        markedLoaded.then(() => {
+          if (window.marked) {
+            textElement.innerHTML = marked.parse(text);
+          } else {
+            textElement.textContent = text;
+          }
+        }).catch(() => {
+          textElement.textContent = text;
+        });
+        messageElement.appendChild(textElement);
+        
+        // Add citations if any
+        if (citations && citations.length > 0) {
+          const citationsElement = document.createElement('div');
+          citationsElement.className = 'citations';
+          citationsElement.style.marginTop = '8px';
+          citationsElement.style.fontSize = '12px';
+          citationsElement.style.color = '#6b7280';
+          
+          citations.forEach(citation => {
+            const citationElement = document.createElement('div');
+            citationElement.textContent = citation;
+            citationsElement.appendChild(citationElement);
+          });
+          
+          messageElement.appendChild(citationsElement);
+        }
+        
         chatMessages.appendChild(messageElement);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
@@ -472,36 +616,77 @@
             mode: 'cors',
             body: JSON.stringify({
               chatbot_id: chatbotId,
-              session_id: sessionId, // This will be null initially
+              session_id: sessionId,
               customer: customerInfo,
               messages: [messageText]
             })
           });
-          
-          const data = await response.json();
-          
+
           if (!response.ok) {
-            throw new Error(data.error || 'Failed to get response');
+            throw new Error(`Failed to get response: ${response.status} ${response.statusText}`);
           }
-          
-          // Save session ID if it's a new conversation
-          if (!sessionId && data.session_id) {
-            sessionId = data.session_id;
-            console.log('Received new session ID:', sessionId);
-            localStorage.setItem(`chatbot_session_${chatbotId}`, sessionId);
+
+          // Create a temporary message element for streaming
+          let currentMessageElement = null;
+          let currentText = '';
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            console.log('Received chunk:', chunk);
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  console.log('Parsed SSE data:', data);
+                  
+                  if (data.type === 'done') {
+                    // Create message element if it doesn't exist
+                    if (!currentMessageElement) {
+                      currentMessageElement = document.createElement('div');
+                      currentMessageElement.className = 'chat-message message-bot';
+                      chatMessages.appendChild(currentMessageElement);
+                    }
+
+                    // Display the message
+                    await markedLoaded;
+                    if (window.marked) {
+                      currentMessageElement.innerHTML = marked.parse(data.message.content);
+                    } else {
+                      currentMessageElement.textContent = data.message.content;
+                    }
+
+                    // Save session ID if it's a new conversation
+                    if (!sessionId && data.session_id) {
+                      sessionId = data.session_id;
+                      console.log('Received new session ID:', sessionId);
+                      localStorage.setItem(`chatbot_session_${chatbotId}`, sessionId);
+                    }
+
+                    // Save bot message to history
+                    messageHistory.push({ role: 'assistant', content: data.message.content });
+                    
+                    // Store updated message history
+                    localStorage.setItem(`chatbot_messages_${chatbotId}_${sessionId}`, JSON.stringify(messageHistory));
+                  } else if (data.type === 'error') {
+                    throw new Error(data.error);
+                  }
+                } catch (e) {
+                  console.error('Error parsing SSE data:', e);
+                }
+              }
+            }
           }
-          
+
           // Hide typing indicator
           hideTypingIndicator();
-          
-          // Add bot response to chat
-          addBotMessage(data.reply);
-          
-          // Save bot message to history
-          messageHistory.push({ role: 'assistant', content: data.reply });
-          
-          // Store updated message history
-          localStorage.setItem(`chatbot_messages_${chatbotId}_${sessionId}`, JSON.stringify(messageHistory));
           
         } catch (error) {
           console.error('Error sending message:', error);

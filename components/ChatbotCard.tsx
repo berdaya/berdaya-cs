@@ -44,12 +44,12 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
           </summary>
           <div className="mt-2 p-2 bg-gray-200 rounded text-xs break-all relative">
             <code className="text-gray-900">
-              {`<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}"></script>`}
+              {`<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.origin}"></script>`}
             </code>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(
-                  `<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}"></script>`
+                  `<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.origin}"></script>`
                 );
                 alert('Embed code copied to clipboard!');
               }}

@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [accessCode, setAccessCode] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
     // Check if access is already granted
     const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (isAuthenticated === 'true') {
+    const storedApiKey = localStorage.getItem('openai_api_key');
+    if (isAuthenticated === 'true' && storedApiKey) {
       router.push('/playground');
     }
   }, [router]);
@@ -23,6 +25,7 @@ export default function Home() {
     if (accessCode === process.env.NEXT_PUBLIC_ACCESS_CODE) {
       // Store authentication in localStorage
       localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('openai_api_key', apiKey);
       
       // Dispatch custom event to notify components about auth change
       window.dispatchEvent(new Event('authStateChanged'));
@@ -48,6 +51,20 @@ export default function Home() {
               id="accessCode"
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 transition-all"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
+              Enter OpenAI API Key
+            </label>
+            <input
+              type="password"
+              id="apiKey"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-600 transition-all"
               required
             />

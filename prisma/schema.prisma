@@ -1,38 +1,27 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Assistant {
-  id             String   @id @default(uuid())
-  openaiId       String   @unique @map("openai_id")
-  name           String
-  instructions   String
-  model          String
-  tools          String[]
-  temperature    Float
-  topP           Float    @map("top_p")
-  responseFormat Json
-  fileIds        String[] @map("file_ids")
-  openaiApiKey   String   @map("openai_api_key")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  threads        Thread[]
+generator client {
+  provider = "prisma-client-js"
+}
 
-  @@map("assistants")
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?  @unique
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  threads   Thread[]
 }
 
 model Thread {
-  id          String    @id @default(uuid())
-  openaiId    String    @unique @map("openai_id")
-  assistantId String    @map("assistant_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  assistant   Assistant @relation(fields: [assistantId], references: [id], onDelete: Cascade)
-
-  @@map("threads")
-}
+  id         String    @id @default(cuid())
+  openaiId   String    @unique // Store OpenAI's thread ID
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+} 
