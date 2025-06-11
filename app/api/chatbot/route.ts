@@ -40,8 +40,10 @@ export async function POST(request: Request) {
     // Get or create customer
     let customerRecord = await prisma.customer.findFirst({
       where: {
-        email: customer.email || undefined,
-        phone: customer.phone || undefined,
+        OR: [
+          { email: customer.email || undefined },
+          { phone: customer.phone || undefined }
+        ]
       },
     });
 
@@ -54,34 +56,31 @@ export async function POST(request: Request) {
           phone: customer.phone,
         },
       });
-    }
-
-    // Get or create thread
-    let thread = await prisma.thread.findFirst({
-      where: {
-        customerId: customerRecord.id,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    if (!thread) {
-      console.log('Creating new thread');
-      // Create new OpenAI thread
-      const openaiThread = await openai.beta.threads.create();
-      console.log('Created OpenAI thread:', openaiThread.id);
-
-      thread = await prisma.thread.create({
+    } else {
+      console.log('Updating existing customer record');
+      // Update customer if any information has changed
+      customerRecord = await prisma.customer.update({
+        where: { id: customerRecord.id },
         data: {
-          openaiId: openaiThread.id,
-          customerId: customerRecord.id,
+          name: customer.name || customerRecord.name,
+          phone: customer.phone || customerRecord.phone,
         },
       });
-      console.log('Created database thread:', thread.id);
-    } else {
-      console.log('Using existing thread:', thread.id);
     }
+
+    // Always create a new thread for each chat
+    console.log('Creating new thread');
+    // Create new OpenAI thread
+    const openaiThread = await openai.beta.threads.create();
+    console.log('Created OpenAI thread:', openaiThread.id);
+
+    const thread = await prisma.thread.create({
+      data: {
+        openaiId: openaiThread.id,
+        customerId: customerRecord.id,
+      },
+    });
+    console.log('Created database thread:', thread.id);
 
     // Add message to OpenAI thread
     console.log('Adding message to thread:', messages[0]);
