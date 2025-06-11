@@ -23,7 +23,7 @@ const errorResponse = (message: string, details: unknown = null, status = 400) =
 
 export async function POST(request: Request) {
   try {
-    const { chatbot_id, session_id, customer, messages } = await request.json();
+    const { chatbot_id, customer, messages } = await request.json();
 
     if (!chatbot_id) {
       return errorResponse('Chatbot ID is required');
