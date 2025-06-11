@@ -20,6 +20,18 @@ type Chatbot = {
   openai_api_key: string;
 };
 
+type ChatbotFormData = {
+  name: string;
+  instructions: string;
+  model: string;
+  tools: string[];
+  temperature: number;
+  top_p: number;
+  response_format: { type: string };
+  file: File | null;
+  openai_api_key: string;
+};
+
 export default function Playground() {
   const [chatbots, setChatbots] = useState<Chatbot[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -95,7 +107,7 @@ export default function Playground() {
     }
   };
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: ChatbotFormData) => {
     setIsUploading(true);
     setError('');
 

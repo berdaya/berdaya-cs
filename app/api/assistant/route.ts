@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
     });
 
     // Update the assistant in OpenAI
-    const openaiAssistant = await openai.beta.assistants.update(existingAssistant.openaiId, {
+    await openai.beta.assistants.update(existingAssistant.openaiId, {
       name,
       instructions,
       model,

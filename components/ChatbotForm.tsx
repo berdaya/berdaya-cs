@@ -1,8 +1,20 @@
 import { useState, useRef } from 'react';
 import { ArrowLeft, Info, Upload, Loader2 } from 'lucide-react';
 
+type ChatbotFormData = {
+  name: string;
+  instructions: string;
+  model: string;
+  tools: string[];
+  temperature: number;
+  top_p: number;
+  response_format: { type: string };
+  file: File | null;
+  openai_api_key: string;
+};
+
 type ChatbotFormProps = {
-  onSubmit: (formData: any) => Promise<void>;
+  onSubmit: (formData: ChatbotFormData) => Promise<void>;
   onCancel: () => void;
   isUploading: boolean;
 };
@@ -14,7 +26,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
   const [tools, setTools] = useState<string[]>(['retrieval']);
   const [temperature, setTemperature] = useState(0.7);
   const [topP, setTopP] = useState(1);
-  const [responseFormat, setResponseFormat] = useState({ type: 'text' });
+  const [responseFormat] = useState({ type: 'text' });
   const [file, setFile] = useState<File | null>(null);
   const [openaiApiKey, setOpenaiApiKey] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
