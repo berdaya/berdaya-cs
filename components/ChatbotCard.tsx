@@ -104,7 +104,8 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
                   // Try using the modern clipboard API first
                   await navigator.clipboard.writeText(embedCode);
                   toast.success('Embed code copied to clipboard!');
-                } catch (err) {
+                } catch (error) {
+                  console.error('Failed to copy using clipboard API:', error);
                   // Fallback for older browsers or when clipboard API is not available
                   const textArea = document.createElement('textarea');
                   textArea.value = embedCode;
@@ -117,7 +118,8 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
                   try {
                     document.execCommand('copy');
                     toast.success('Embed code copied to clipboard!');
-                  } catch (err) {
+                  } catch (fallbackError) {
+                    console.error('Failed to copy using fallback method:', fallbackError);
                     toast.error('Failed to copy embed code. Please try selecting and copying manually.');
                   }
                   document.body.removeChild(textArea);
