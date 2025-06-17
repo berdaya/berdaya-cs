@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Chatbot Admin Panel",
+  title: "Chatbot Admin Panel - Berdaya",
   description: "Admin panel for managing chatbots",
 };
 

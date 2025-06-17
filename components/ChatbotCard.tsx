@@ -1,5 +1,6 @@
 import { Code, Trash2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 type FileInfo = {
   id: string;
@@ -79,7 +80,7 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
         <div className="flex space-x-2">
           <button
             onClick={() => onDelete(chatbot.id)}
-            className="flex-1 bg-gray-200 text-gray-900 text-sm py-2 px-3 rounded hover:bg-gray-300 transition-colors flex items-center justify-center"
+            className="flex-1 bg-gray-200 text-gray-900 text-sm py-2 px-3 rounded hover:bg-gray-300 transition-colors flex items-center justify-center cursor-pointer"
           >
             <Trash2 className="h-4 w-4 mr-1" />
             Delete
@@ -101,9 +102,9 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
                 navigator.clipboard.writeText(
                   `<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.origin}"></script>`
                 );
-                alert('Embed code copied to clipboard!');
+                toast.success('Embed code copied to clipboard!');
               }}
-              className="mt-2 text-xs bg-gray-900 text-white py-1 px-2 rounded hover:bg-gray-800 transition-colors"
+              className="mt-2 text-xs bg-gray-900 text-white py-1 px-2 rounded hover:bg-gray-800 transition-colors cursor-pointer"
             >
               Copy to Clipboard
             </button>
