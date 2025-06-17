@@ -95,14 +95,33 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
           </summary>
           <div className="mt-2 p-2 bg-gray-200 rounded text-xs break-all relative">
             <code className="text-gray-900">
-              {`<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.origin}"></script>`}
+              {`<script src="${window.location.protocol}//${window.location.host}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.protocol}//${window.location.host}"></script>`}
             </code>
             <button
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  `<script src="${window.location.origin}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.origin}"></script>`
-                );
-                toast.success('Embed code copied to clipboard!');
+              onClick={async () => {
+                const embedCode = `<script src="${window.location.protocol}//${window.location.host}/embed.js" data-chatbot-id="${chatbot.id}" data-host-url="${window.location.protocol}//${window.location.host}"></script>`;
+                try {
+                  // Try using the modern clipboard API first
+                  await navigator.clipboard.writeText(embedCode);
+                  toast.success('Embed code copied to clipboard!');
+                } catch (err) {
+                  // Fallback for older browsers or when clipboard API is not available
+                  const textArea = document.createElement('textarea');
+                  textArea.value = embedCode;
+                  textArea.style.position = 'fixed';
+                  textArea.style.left = '-999999px';
+                  textArea.style.top = '-999999px';
+                  document.body.appendChild(textArea);
+                  textArea.focus();
+                  textArea.select();
+                  try {
+                    document.execCommand('copy');
+                    toast.success('Embed code copied to clipboard!');
+                  } catch (err) {
+                    toast.error('Failed to copy embed code. Please try selecting and copying manually.');
+                  }
+                  document.body.removeChild(textArea);
+                }
               }}
               className="mt-2 text-xs bg-gray-900 text-white py-1 px-2 rounded hover:bg-gray-800 transition-colors cursor-pointer"
             >
