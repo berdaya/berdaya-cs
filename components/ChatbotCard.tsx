@@ -1,4 +1,11 @@
-import { Code, Trash2 } from 'lucide-react';
+import { Code, Trash2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
+
+type FileInfo = {
+  id: string;
+  filename: string;
+  status: string;
+};
 
 type ChatbotCardProps = {
   chatbot: {
@@ -6,11 +13,16 @@ type ChatbotCardProps = {
     name: string;
     instructions: string;
     createdAt: string;
+    vectorStoreId?: string;
+    file_ids?: string[];
+    files?: FileInfo[];
   };
   onDelete: (id: string) => void;
 };
 
 export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <div className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:shadow transition-shadow">
       <div className="p-5">
@@ -25,6 +37,44 @@ export default function ChatbotCard({ chatbot, onDelete }: ChatbotCardProps) {
             minute: '2-digit'
           }) : 'Date not available'}
         </p>
+        
+        {chatbot.vectorStoreId && (
+          <div className="mb-4">
+            <div 
+              className="flex items-center text-sm text-gray-600 mb-2 cursor-pointer hover:text-gray-900"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              <span>Knowledge Base</span>
+              {chatbot.files && chatbot.files.length > 0 && (
+                <span className="ml-2 text-xs text-gray-500">
+                  ({chatbot.files.length} file{chatbot.files.length !== 1 ? 's' : ''})
+                </span>
+              )}
+              {chatbot.files && chatbot.files.length > 0 && (
+                <span className="ml-auto">
+                  {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </span>
+              )}
+            </div>
+            {isExpanded && chatbot.files && chatbot.files.length > 0 && (
+              <div className="text-xs text-gray-500 pl-5">
+                <ul className="list-disc list-inside space-y-1">
+                  {chatbot.files.map(file => (
+                    <li key={file.id} className="text-gray-600">
+                      {file.filename} ({file.status})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(!chatbot.files || chatbot.files.length === 0) && (
+              <div className="text-xs text-gray-500 pl-5">
+                No files attached
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="flex space-x-2">
           <button

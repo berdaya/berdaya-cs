@@ -6,6 +6,12 @@ interface OpenAIError extends Error {
   code?: string;
 }
 
+interface FileInfo {
+  id: string;
+  filename: string;
+  status: string;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -98,17 +104,39 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    // Since we're not using a database, we'll need to store the API key somewhere
-    // For now, we'll use an environment variable
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
 
     const assistants = await openai.beta.assistants.list();
     
-    return NextResponse.json({
-      success: true,
-      data: assistants.data.map(assistant => ({
+    // Fetch file information for each assistant
+    const assistantsWithFiles = await Promise.all(assistants.data.map(async (assistant) => {
+      let fileInfo: FileInfo[] = [];
+      
+      if (assistant.tool_resources?.file_search?.vector_store_ids) {
+        const vectorStoreId = assistant.tool_resources.file_search.vector_store_ids[0];
+        if (vectorStoreId) {
+          try {
+            const vectorStore = await openai.vectorStores.retrieve(vectorStoreId);
+            const files = await openai.vectorStores.files.list(vectorStoreId);
+            
+            // Fetch file details for each file
+            fileInfo = await Promise.all(files.data.map(async (file) => {
+              const fileDetails = await openai.files.retrieve(file.id);
+              return {
+                id: file.id,
+                filename: fileDetails.filename,
+                status: file.status
+              };
+            }));
+          } catch (error) {
+            console.error('Error fetching vector store files:', error);
+          }
+        }
+      }
+
+      return {
         id: assistant.id,
         name: assistant.name,
         instructions: assistant.instructions,
@@ -117,8 +145,16 @@ export async function GET() {
         temperature: assistant.temperature,
         top_p: assistant.top_p,
         response_format: assistant.response_format,
+        vectorStoreId: assistant.tool_resources?.file_search?.vector_store_ids?.[0] || null,
+        file_ids: assistant.tool_resources?.file_search?.vector_store_ids || [],
+        files: fileInfo,
         createdAt: new Date().toISOString(),
-      })),
+      };
+    }));
+    
+    return NextResponse.json({
+      success: true,
+      data: assistantsWithFiles,
     });
   } catch (error: unknown) {
     console.error('Error fetching assistants:', error);

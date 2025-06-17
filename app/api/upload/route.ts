@@ -13,19 +13,14 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const apiKey = formData.get('openai_api_key') as string;
     
     if (!file) {
       return errorResponse('No file provided');
     }
 
-    if (!apiKey) {
-      return errorResponse('OpenAI API key is required');
-    }
-
-    // Initialize OpenAI client with the provided API key
+    // Initialize OpenAI client with server-side API key
     const openai = new OpenAI({
-      apiKey: apiKey,
+      apiKey: process.env.OPENAI_API_KEY,
     });
 
     // Upload file to OpenAI

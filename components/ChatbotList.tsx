@@ -6,6 +6,8 @@ type Chatbot = {
   name: string;
   instructions: string;
   createdAt: string;
+  vectorStoreId?: string;
+  file_ids?: string[];
 };
 
 type ChatbotListProps = {

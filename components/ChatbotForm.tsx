@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Info, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, Info, Upload, Loader2, X } from 'lucide-react';
 
 type ChatbotFormData = {
   name: string;
@@ -9,8 +9,7 @@ type ChatbotFormData = {
   temperature: number;
   top_p: number;
   response_format: { type: string };
-  file: File | null;
-  openai_api_key: string;
+  files: File[];
 };
 
 type ChatbotFormProps = {
@@ -19,28 +18,42 @@ type ChatbotFormProps = {
   isUploading: boolean;
 };
 
+const AI_MODELS = [
+  { id: 'gpt-4o-mini', name: 'GPT-4o-mini (Default)' },
+  { id: 'gpt-4', name: 'GPT-4' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
+  { id: 'gpt-3.5-turbo-16k', name: 'GPT-3.5 Turbo 16K' },
+];
+
 export default function ChatbotForm({ onSubmit, onCancel, isUploading }: ChatbotFormProps) {
   const [name, setName] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [model] = useState('gpt-4o-mini');
+  const [model, setModel] = useState('gpt-4o-mini');
   const [tools, setTools] = useState<string[]>(['retrieval']);
   const [temperature, setTemperature] = useState(0.7);
   const [topP, setTopP] = useState(1);
   const [responseFormat] = useState({ type: 'text' });
-  const [file, setFile] = useState<File | null>(null);
-  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
       const allowedTypes = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
       const allowedExtensions = ['.txt', '.pdf', '.doc', '.docx'];
       
-      if (allowedTypes.includes(selectedFile.type) || allowedExtensions.some(ext => selectedFile.name.toLowerCase().endsWith(ext))) {
-        setFile(selectedFile);
-      }
+      const validFiles = newFiles.filter(file => 
+        allowedTypes.includes(file.type) || 
+        allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+      );
+
+      setFiles(prevFiles => [...prevFiles, ...validFiles]);
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,8 +66,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
       temperature,
       top_p: topP,
       response_format: responseFormat,
-      file,
-      openai_api_key: openaiApiKey,
+      files,
     });
   };
 
@@ -77,37 +89,7 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           <div className="flex items-start">
             <Info className="h-5 w-5 text-gray-900 dark:text-gray-200 mr-2 mt-0.5" />
             <p className="text-gray-900 dark:text-gray-200">
-              Fill out this form to configure your chatbot. You&apos;ll need an OpenAI API key and a prompt that defines how your chatbot should behave.
-            </p>
-          </div>
-        </div>
-        
-        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-          <h3 className="font-medium text-gray-900 dark:text-white mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">API Configuration</h3>
-          
-          <div className="mb-4">
-            <label htmlFor="openaiApiKey" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              OpenAI API Key *
-            </label>
-            <input
-              type="password"
-              id="openaiApiKey"
-              value={openaiApiKey}
-              onChange={(e) => setOpenaiApiKey(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-              placeholder="sk-..."
-              required
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Your API key will be stored securely and used only for this chatbot. Get your API key from{' '}
-              <a 
-                href="https://platform.openai.com/api-keys" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-gray-900 dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-400"
-              >
-                OpenAI Platform
-              </a>
+              Fill out this form to configure your chatbot. You&apos;ll need a prompt that defines how your chatbot should behave.
             </p>
           </div>
         </div>
@@ -167,14 +149,31 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           
           <div className="mb-4">
             <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Model
+              AI Model
             </label>
-            <input
-              type="text"
-              value="GPT-4o-mini"
-              disabled
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-            />
+            <select
+              id="model"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-gray-500 focus:border-gray-500 dark:focus:ring-gray-400 dark:focus:border-gray-400 transition-colors bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            >
+              {AI_MODELS.map(model => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              View model pricing at{' '}
+              <a 
+                href="https://platform.openai.com/docs/pricing" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-gray-900 dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-400"
+              >
+                OpenAI Platform
+              </a>
+            </p>
           </div>
           
           <div className="mb-4">
@@ -233,41 +232,53 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
           </div>
         </div>
         
-        <div className="mb-4">
-          <label htmlFor="file" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div>
+          <label htmlFor="files" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Knowledge Files (Optional)
           </label>
           <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md px-6 pt-5 pb-6">
             <div className="space-y-1 text-center">
               <Upload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
               <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                <label htmlFor="file" className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-gray-900 dark:text-gray-200 hover:text-gray-800 dark:hover:text-gray-300 focus-within:outline-none">
-                  <span>Upload a file</span>
+                <label htmlFor="files" className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-gray-900 dark:text-gray-200 hover:text-gray-800 dark:hover:text-gray-300 focus-within:outline-none">
+                  <span>Upload files</span>
                   <input
-                    id="file"
-                    name="file"
+                    id="files"
+                    name="files"
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
                     className="sr-only"
                     accept=".txt,.pdf,.doc,.docx"
+                    multiple
                   />
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Supported formats: TXT, PDF, DOC, DOCX (up to 10MB)
+                Supported formats: TXT, PDF, DOC, DOCX (up to 10MB each)
               </p>
-              {file && (
-                <p className="text-sm text-gray-900 dark:text-gray-200">
-                  Selected: {file.name}
-                </p>
+              {files.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                      <span className="text-sm text-gray-900 dark:text-gray-200 truncate">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
         </div>
         
-        <div className="flex space-x-4 pt-4">
+        <div className="flex space-x-4">
           <button
             type="submit"
             disabled={isUploading}

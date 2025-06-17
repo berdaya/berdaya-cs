@@ -6,6 +6,12 @@ import { toast } from 'sonner';
 import ChatbotList from '@/components/ChatbotList';
 import ChatbotForm from '@/components/ChatbotForm';
 
+type FileInfo = {
+  id: string;
+  filename: string;
+  status: string;
+};
+
 type Chatbot = {
   id: string;
   name: string;
@@ -18,6 +24,8 @@ type Chatbot = {
   file_ids: string[];
   createdAt: string;
   openai_api_key: string;
+  vectorStoreId?: string;
+  files?: FileInfo[];
 };
 
 type ChatbotFormData = {
@@ -28,8 +36,7 @@ type ChatbotFormData = {
   temperature: number;
   top_p: number;
   response_format: { type: string };
-  file: File | null;
-  openai_api_key: string;
+  files: File[];
 };
 
 export default function Playground() {
@@ -53,6 +60,7 @@ export default function Playground() {
 
       const data = await response.json();
       console.log('Received chatbot data:', data.data);
+      console.log('First chatbot vector store info:', data.data?.[0]?.vectorStoreId, data.data?.[0]?.file_ids);
       
       if (response.ok) {
         setChatbots(data.data || []);
@@ -112,25 +120,30 @@ export default function Playground() {
     setError('');
 
     try {
-      let fileId = '';
+      const fileIds: string[] = [];
 
-      if (formData.file) {
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', formData.file);
-        uploadFormData.append('openai_api_key', formData.openai_api_key);
-        
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: uploadFormData,
+      if (formData.files && formData.files.length > 0) {
+        // Upload all files in parallel
+        const uploadPromises = formData.files.map(async (file) => {
+          const uploadFormData = new FormData();
+          uploadFormData.append('file', file);
+          
+          const uploadResponse = await fetch('/api/upload', {
+            method: 'POST',
+            body: uploadFormData,
+          });
+
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || 'Failed to upload file');
+          }
+
+          const uploadData = await uploadResponse.json();
+          return uploadData.file_id;
         });
 
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse.json();
-          throw new Error(errorData.error || 'Failed to upload file');
-        }
-
-        const uploadData = await uploadResponse.json();
-        fileId = uploadData.file_id;
+        // Wait for all uploads to complete
+        fileIds.push(...(await Promise.all(uploadPromises)));
       }
 
       const assistantData = {
@@ -141,8 +154,7 @@ export default function Playground() {
         temperature: formData.temperature,
         top_p: formData.top_p,
         response_format: formData.response_format,
-        file_ids: fileId ? [fileId] : [],
-        openai_api_key: formData.openai_api_key,
+        file_ids: fileIds,
       };
 
       const response = await fetch('/api/assistant', {
