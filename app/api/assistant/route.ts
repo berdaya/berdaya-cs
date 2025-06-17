@@ -118,7 +118,6 @@ export async function GET() {
         const vectorStoreId = assistant.tool_resources.file_search.vector_store_ids[0];
         if (vectorStoreId) {
           try {
-            const vectorStore = await openai.vectorStores.retrieve(vectorStoreId);
             const files = await openai.vectorStores.files.list(vectorStoreId);
             
             // Fetch file details for each file
