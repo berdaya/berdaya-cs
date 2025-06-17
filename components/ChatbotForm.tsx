@@ -40,12 +40,8 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      const allowedTypes = ['text/plain', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-      const allowedExtensions = ['.txt', '.pdf', '.doc', '.docx'];
-      
       const validFiles = newFiles.filter(file => 
-        allowedTypes.includes(file.type) || 
-        allowedExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+        file.name.toLowerCase().endsWith('.txt')
       );
 
       setFiles(prevFiles => [...prevFiles, ...validFiles]);
@@ -249,14 +245,14 @@ export default function ChatbotForm({ onSubmit, onCancel, isUploading }: Chatbot
                     ref={fileInputRef}
                     onChange={handleFileChange}
                     className="sr-only"
-                    accept=".txt,.pdf,.doc,.docx"
+                    accept=".txt"
                     multiple
                   />
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Supported formats: TXT, PDF, DOC, DOCX (up to 10MB each)
+                Only .txt files are supported (up to 10MB each)
               </p>
               {files.length > 0 && (
                 <div className="mt-4 space-y-2">

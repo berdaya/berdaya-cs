@@ -18,6 +18,11 @@ export async function POST(request: NextRequest) {
       return errorResponse('No file provided');
     }
 
+    // Check if file is a .txt file
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+      return errorResponse('Only .txt files are allowed');
+    }
+
     // Initialize OpenAI client with server-side API key
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
