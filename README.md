@@ -1,36 +1,125 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 📄 App Documentation
 
-First, run the development server:
+## ✅ Changing the API Key
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. **Get your OpenAI API key** from [openai.com](https://platform.openai.com/account/api-keys) and ensure you have credit.
+2. **Navigate to your project directory** on your VPS:
+   ```bash
+   cd /path/to/your/project
+   ```
+3. **Edit the `.env` file** to update the API key:
+   ```bash
+   nano .env
+   ```
+   Change the value of `OPENAI_API_KEY` to your new key.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. **Restart the app** (if using PM2 for process management):
+   ```bash
+   pm2 status
+   pm2 stop <instance_number>
+   pm2 delete <instance_number>
+   npm run build
+   pm2 start npm --name "your-app-name" -- start
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤖 Creating a Custom Chatbot and Embedding into Any Web App
 
-## Learn More
+1. **Open your browser and go to:**
+   ```
+   http://<your-server-ip>:3000/playground
+   ```
+2. **Enter the access code** (found in `.env` as `NEXT_PUBLIC_ACCESS_CODE`).
+3. **Click "Create Chatbot"** and fill in the configuration (name, prompt, model, etc.). Optionally, upload context files for RAG.
+4. **Click "Create"** to save your chatbot.
+5. **Copy the embed script:**
+   ```html
+   <script src="http://<your-server-ip>:3000/embed.js"
+           data-chatbot-id="YOUR_CHATBOT_ID"
+           data-host-url="http://<your-server-ip>:3000">
+   </script>
+   ```
+   - Replace `YOUR_CHATBOT_ID` with the ID of your created chatbot.
 
-To learn more about Next.js, take a look at the following resources:
+### 🔗 To embed the chatbot:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **On any HTML website:** Paste the script above inside `<head>` or just before `</body>`.
+- **In WordPress:** Use a plugin like "Insert Headers and Footers" or add to the Theme Editor.
+- **In Webflow, Wix, Shopify:** Use the Custom Code section in site/page settings, paste before `</body>`.
+- **In Odoo:** Go to Website → Edit → Custom Code, and paste the script.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Accessing the PostgreSQL Database
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Open the database shell:**
+   ```bash
+   sudo -u postgres psql -U <db_user> -d <db_name>
+   ```
+   - Use credentials from `.env` (`PGUSER`, `PGDATABASE`, etc.).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+2. **Connect to the chatbot-specific database:**
+   ```sql
+   \c neondb
+   ```
+
+3. **View available tables:**
+   ```sql
+   \dt
+   ```
+
+4. **View contents of the Customer table:**
+   ```sql
+   SELECT * FROM "Customer";
+   ```
+
+5. **View contents of the Thread table:**
+   ```sql
+   SELECT * FROM "Thread";
+   ```
+
+---
+
+## ⚙️ Environment Variables
+
+- `OPENAI_API_KEY`: Your OpenAI API key.
+- `NEXT_PUBLIC_ACCESS_CODE`: Access code for the playground.
+- `DATABASE_URL`: PostgreSQL connection string.
+- (See `.env` for all variables.)
+
+---
+
+## 🚀 Deployment & Management
+
+- **Development:**  
+  ```bash
+  npm run dev
+  ```
+- **Production build:**  
+  ```bash
+  npm run build
+  npm start
+  ```
+- **With PM2:**  
+  ```bash
+  pm2 start npm --name "your-app-name" -- start
+  ```
+
+---
+
+## 🧩 Features
+
+- Create, manage, and delete chatbots via the `/playground` UI.
+- Upload context files for RAG (Retrieval-Augmented Generation).
+- Embed chatbots in any website with a simple script.
+- All chatbot and thread data is stored in PostgreSQL (see `prisma/schema.prisma` for schema).
+
+---
+
+## 🔒 Security
+
+- Access to the playground is protected by an access code (`NEXT_PUBLIC_ACCESS_CODE`).
+- API keys and database credentials are stored in `.env` and should be kept secure.
