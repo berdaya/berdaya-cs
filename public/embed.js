@@ -701,6 +701,8 @@
     
     function updateStreamingMessage(streamingElements, text, isComplete = false) {
       const { messageElement, textElement, cursor } = streamingElements;
+      // Remove all source references like 【4:0†source】 from the text
+      text = text.replace(/【\d+:\d+†source】/g, '');
       
       // Update text content
       markedLoaded.then(() => {
