@@ -641,6 +641,8 @@
     }
     
     function addBotMessage(text, citations = []) {
+      // Remove all source references like 【4:0†source】 from the text
+      text = text.replace(/【\d+:\d+†source】/g, '');
       const messageElement = document.createElement('div');
       messageElement.className = 'chat-message message-bot';
       
